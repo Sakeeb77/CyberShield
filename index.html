@@ -71,6 +71,7 @@ async function checkLiveIP() {
     document.getElementById('ip-isp').textContent     = data.isp     || 'Unknown';
     document.getElementById('ip-usage').textContent   = data.usageType || 'Unknown';
     document.getElementById('ip-reports').textContent = data.totalReports.toLocaleString() + ' reports';
+    lastIPResult = data;
     document.getElementById('ip-last').textContent    = data.lastReported
       ? new Date(data.lastReported).toLocaleDateString()
       : 'Never reported';
@@ -81,6 +82,7 @@ async function checkLiveIP() {
     errorBox.className = 'ip-error';
     errorBox.textContent = '⚠ ' + (err.message || 'Failed to check IP. Please try again.');
     errorBox.style.display = 'block';
+    lastIPResult = null;
   } finally {
     btn.disabled = false;
     btn.textContent = '▶ Check IP';
@@ -166,6 +168,7 @@ async function checkLiveIP() {
     document.getElementById('ip-isp').textContent     = data.isp     || 'Unknown';
     document.getElementById('ip-usage').textContent   = data.usageType || 'Unknown';
     document.getElementById('ip-reports').textContent = data.totalReports.toLocaleString() + ' reports';
+    lastIPResult = data;
     document.getElementById('ip-last').textContent    = data.lastReported
       ? new Date(data.lastReported).toLocaleDateString()
       : 'Never reported';
@@ -176,6 +179,7 @@ async function checkLiveIP() {
     errorBox.className = 'ip-error';
     errorBox.textContent = '⚠ ' + (err.message || 'Failed to check IP. Please try again.');
     errorBox.style.display = 'block';
+    lastIPResult = null;
   } finally {
     btn.disabled = false;
     btn.textContent = '▶ Check IP';
@@ -725,6 +729,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script>
 let scanCount = 0, threatCount = 0, cleanCount = 0;
+let lastIPResult = null;
 let pieData = { Normal: 0, DDoS: 0, Ransomware: 0, 'SQL Injection': 0, Phishing: 0, 'Man-in-Middle': 0, 'Port Scan': 0 };
 let pieChart, barChart;
 let lastResult = null;
@@ -986,6 +991,40 @@ function downloadReport() {
     doc.text(rec, 24, y + i * 12);
   });
 
+  // IP Checker section
+  if (lastIPResult) {
+    y += 14;
+    if (y > 240) { doc.addPage(); doc.setFillColor(10, 14, 26); doc.rect(0, 0, 210, 297, 'F'); y = 20; }
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 212, 170);
+    doc.text('Live IP Threat Intelligence Result', 15, y); y += 8;
+    doc.setFillColor(26, 34, 53); doc.rect(13, y - 4, 180, 88, 'F');
+    var ipFields = [
+      ['Checked IP',    lastIPResult.ip],
+      ['Abuse Score',   lastIPResult.abuseScore + '%'],
+      ['Threat Level',  lastIPResult.threatLevel],
+      ['Status',        lastIPResult.isThreat ? 'THREAT DETECTED' : 'CLEAN - NO THREAT'],
+      ['Country',       lastIPResult.countryName || lastIPResult.country],
+      ['ISP',           lastIPResult.isp],
+      ['Usage Type',    lastIPResult.usageType],
+      ['Total Reports', lastIPResult.totalReports + ' global reports'],
+      ['Last Reported', lastIPResult.lastReported ? new Date(lastIPResult.lastReported).toLocaleDateString() : 'Never reported'],
+    ];
+    doc.setFont('helvetica', 'normal');
+    ipFields.forEach(function(pair) {
+      doc.setTextColor(100, 116, 139); doc.setFontSize(9);
+      doc.text(pair[0] + ':', 18, y + 4);
+      var isAlert = (pair[0] === 'Status' && lastIPResult.isThreat);
+      doc.setTextColor(isAlert ? 239 : 226, isAlert ? 68 : 232, isAlert ? 68 : 240);
+      doc.setFont('helvetica', 'bold');
+      doc.text(String(pair[1]), 90, y + 4);
+      doc.setFont('helvetica', 'normal');
+      y += 9;
+    });
+    doc.setTextColor(0, 212, 170); doc.setFontSize(8);
+    doc.text('Source: AbuseIPDB Real-Time Threat Intelligence API', 18, y + 4);
+  }
+
   doc.setTextColor(31, 41, 55);
   doc.setFontSize(9);
   doc.text('CyberShield | Sakibul Hossain Sakib (241222) | MSc IT, PMIT-31 | ' + new Date().getFullYear(), 15, 290);
@@ -1059,6 +1098,7 @@ async function checkLiveIP() {
     document.getElementById('ip-isp').textContent     = data.isp     || 'Unknown';
     document.getElementById('ip-usage').textContent   = data.usageType || 'Unknown';
     document.getElementById('ip-reports').textContent = data.totalReports.toLocaleString() + ' reports';
+    lastIPResult = data;
     document.getElementById('ip-last').textContent    = data.lastReported
       ? new Date(data.lastReported).toLocaleDateString()
       : 'Never reported';
@@ -1069,6 +1109,7 @@ async function checkLiveIP() {
     errorBox.className = 'ip-error';
     errorBox.textContent = '⚠ ' + (err.message || 'Failed to check IP. Please try again.');
     errorBox.style.display = 'block';
+    lastIPResult = null;
   } finally {
     btn.disabled = false;
     btn.textContent = '▶ Check IP';
