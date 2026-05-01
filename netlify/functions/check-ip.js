@@ -3,65 +3,75 @@ exports.handler = async (event) => {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
-  const ip = event.queryStringParameters && event.queryStringParameters.ip;
+  const params = event.queryStringParameters || {};
+  const ip = params.ip;
 
   if (!ip) {
     return { statusCode: 400, body: JSON.stringify({ error: 'No IP address provided' }) };
   }
 
-  const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
-  const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
-  if (!ipv4Regex.test(ip) && !ipv6Regex.test(ip)) {
+  const ipv4 = /^(\d{1,3}\.){3}\d{1,3}$/.test(ip);
+  const ipv6 = /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/.test(ip);
+  if (!ipv4 && !ipv6) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Invalid IP address format' }) };
   }
 
-  const privateRanges = ['127.', '192.168.', '10.', '172.16.', '0.0.0.0'];
-  if (privateRanges.some(range => ip.startsWith(range))) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Private/local IP addresses cannot be checked' }) };
+  const blocked = ['127.', '192.168.', '10.', '172.16.', '0.0.0.0'];
+  if (blocked.some(function(r){ return ip.startsWith(r); })) {
+    return { statusCode: 400, body: JSON.stringify({ error: 'Private IP addresses cannot be checked' }) };
   }
 
-  const API_KEY = '94ea9b6d2dcadbe89238107e87f381bda8db756af2d1cf3dae6ea7bc403639717e451702fd2fc42c';
+  var KEY = '94ea9b6d2dcadbe89238107e87f381bda8db756af2d1cf3dae6ea7bc403639717e451702fd2fc42c';
 
   try {
-    const url = 'https://api.abuseipdb.com/api/v2/check?ipAddress=' + encodeURIComponent(ip) + '&maxAgeInDays=90&verbose';
-    const response = await fetch(url, {
+    var endpoint = 'https://api.abuseipdb.com/api/v2/check';
+    var query = '?ipAddress=' + encodeURIComponent(ip) + '&maxAgeInDays=90&verbose';
+    var fullUrl = endpoint + query;
+
+    var response = await fetch(fullUrl, {
+      method: 'GET',
       headers: {
-        'Key': API_KEY,
+        'Key': KEY,
         'Accept': 'application/json'
       }
     });
 
     if (!response.ok) {
-      const errText = await response.text();
+      var errBody = await response.text();
       return {
         statusCode: response.status,
-        body: JSON.stringify({ error: 'AbuseIPDB error: ' + response.status, detail: errText })
+        body: JSON.stringify({ error: 'AbuseIPDB returned error ' + response.status, detail: errBody })
       };
     }
 
-    const json = await response.json();
-    const info = json.data;
+    var parsed = await response.json();
 
-    const abuseScore = info.abuseConfidenceScore;
+    // Use bracket notation to avoid GitHub markdown corruption
+    var info = parsed["data"];
 
-    const result = {
-      ip:           info.ipAddress,
-      isPublic:     info.isPublic,
-      abuseScore:   abuseScore,
-      country:      info.countryCode  || 'Unknown',
-      countryName:  info.countryName  || 'Unknown',
-      isp:          info.isp          || 'Unknown',
-      domain:       info.domain       || 'Unknown',
-      usageType:    info.usageType    || 'Unknown',
-      totalReports: info.totalReports,
-      lastReported: info.lastReportedAt || null,
-      isWhitelisted: info.isWhitelisted,
-      threatLevel:  abuseScore >= 75 ? 'Critical'
-                  : abuseScore >= 50 ? 'High'
-                  : abuseScore >= 25 ? 'Medium'
-                  : abuseScore >  0  ? 'Low'
-                  : 'Clean',
-      isThreat: abuseScore > 0 || info.totalReports > 0,
+    var score = info["abuseConfidenceScore"];
+    var reports = info["totalReports"];
+
+    var level = 'Clean';
+    if (score >= 75) { level = 'Critical'; }
+    else if (score >= 50) { level = 'High'; }
+    else if (score >= 25) { level = 'Medium'; }
+    else if (score > 0)  { level = 'Low'; }
+
+    var output = {
+      ip:           info["ipAddress"],
+      isPublic:     info["isPublic"],
+      abuseScore:   score,
+      country:      info["countryCode"]   || 'Unknown',
+      countryName:  info["countryName"]   || 'Unknown',
+      isp:          info["isp"]           || 'Unknown',
+      domain:       info["domain"]        || 'Unknown',
+      usageType:    info["usageType"]     || 'Unknown',
+      totalReports: reports,
+      lastReported: info["lastReportedAt"] || null,
+      isWhitelisted: info["isWhitelisted"],
+      threatLevel:  level,
+      isThreat:     score > 0 || reports > 0
     };
 
     return {
@@ -70,7 +80,7 @@ exports.handler = async (event) => {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
       },
-      body: JSON.stringify(result)
+      body: JSON.stringify(output)
     };
 
   } catch (err) {
