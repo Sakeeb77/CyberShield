@@ -40,7 +40,8 @@ async function checkLiveIP() {
     document.getElementById(id).textContent = '...';
   });
 
-  try {const response = await fetch('/.netlify/functions/check-ip?ip=' + encodeURIComponent(ip));
+  try {
+    const response = await fetch('/.netlify/functions/check-ip?ip=' + encodeURIComponent(ip));
     const data = await response.json();
 
     if (!response.ok) {
@@ -137,7 +138,7 @@ async function checkLiveIP() {
   });
 
   try {
-    const response = await fetch(`/.netlify/functions/check-ip?ip=${encodeURIComponent(ip)}`);
+    const response = await fetch('/.netlify/functions/check-ip?ip=' + encodeURIComponent(ip));
     const data = await response.json();
 
     if (!response.ok) {
@@ -1020,9 +1021,50 @@ function downloadReport() {
       doc.setFont('helvetica', 'normal');
       y += 9;
     });
-    doc.setTextColor(0, 212, 170); doc.setFontSize(8);
-    doc.text('Source: AbuseIPDB Real-Time Threat Intelligence API', 18, y + 4);
+
   }
+
+  // ── Add Charts as images ────────────────────────────────────────────────
+  try {
+    var pieCanvas = document.getElementById('pieChart');
+    var barCanvas = document.getElementById('barChart');
+    if (pieCanvas && barCanvas && scanCount > 0) {
+      doc.addPage();
+      doc.setFillColor(10, 14, 26); doc.rect(0, 0, 210, 297, 'F');
+      // Page header
+      doc.setFillColor(17, 24, 39); doc.rect(0, 0, 210, 18, 'F');
+      doc.setTextColor(0, 212, 170); doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+      doc.text('CyberShield — Detection Analytics', 15, 12);
+      // Bar chart
+      doc.setTextColor(226, 232, 240); doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+      doc.text('Model Performance Metrics', 15, 32);
+      var barImg = barCanvas.toDataURL('image/png');
+      doc.addImage(barImg, 'PNG', 15, 38, 175, 80);
+      // Pie chart
+      doc.setTextColor(226, 232, 240); doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+      doc.text('Threat Distribution', 15, 132);
+      var pieImg = pieCanvas.toDataURL('image/png');
+      doc.addImage(pieImg, 'PNG', 30, 138, 150, 130);
+      // Stats summary boxes
+      doc.setFontSize(10); doc.setFont('helvetica', 'bold');
+      doc.setTextColor(100, 116, 139);
+      doc.text('Session Summary', 15, 284);
+      var statBoxes = [
+        ['Total Scans', scanCount, '3b82f6'],
+        ['Threats Found', threatCount, 'ef4444'],
+        ['Clean Traffic', cleanCount, '00d4aa'],
+        ['Threat Rate', Math.round((threatCount/scanCount)*100) + '%', 'f59e0b']
+      ];
+      statBoxes.forEach(function(box, i) {
+        var bx = 15 + i * 46;
+        doc.setFillColor(26, 34, 53); doc.rect(bx, 287, 42, 8, 'F');
+        doc.setTextColor(100, 116, 139); doc.setFontSize(6);
+        doc.text(box[0], bx + 21, 291, { align: 'center' });
+        doc.setTextColor(226, 232, 240); doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+        doc.text(String(box[1]), bx + 21, 294, { align: 'center' });
+      });
+    }
+  } catch(chartErr) { console.log('Chart export skipped:', chartErr.message); }
 
   doc.setTextColor(31, 41, 55);
   doc.setFontSize(9);
@@ -1067,7 +1109,7 @@ async function checkLiveIP() {
   });
 
   try {
-    const response = await fetch(`/.netlify/functions/check-ip?ip=${encodeURIComponent(ip)}`);
+    const response = await fetch('/.netlify/functions/check-ip?ip=' + encodeURIComponent(ip));
     const data = await response.json();
 
     if (!response.ok) {
