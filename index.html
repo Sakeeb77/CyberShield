@@ -41,7 +41,7 @@ async function checkLiveIP() {
   });
 
   try {
-    const response = await fetch('/.netlify/functions/check-ip?ip=' + encodeURIComponent(ip));
+    const response = await fetch('/api/check-ip?ip=' + encodeURIComponent(ip));
     const data = await response.json();
 
     if (!response.ok) {
@@ -138,7 +138,7 @@ async function checkLiveIP() {
   });
 
   try {
-    const response = await fetch('/.netlify/functions/check-ip?ip=' + encodeURIComponent(ip));
+    const response = await fetch('/api/check-ip?ip=' + encodeURIComponent(ip));
     const data = await response.json();
 
     if (!response.ok) {
@@ -1109,7 +1109,7 @@ async function checkLiveIP() {
   });
 
   try {
-    const response = await fetch('/.netlify/functions/check-ip?ip=' + encodeURIComponent(ip));
+    const response = await fetch('/api/check-ip?ip=' + encodeURIComponent(ip));
     const data = await response.json();
 
     if (!response.ok) {
