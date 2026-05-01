@@ -53,7 +53,7 @@ async function checkLiveIP() {
     const isThreat = data.isThreat;
     const score    = data.abuseScore;
 
-    resultBox.className = 'ip-result show ' + (isThreat ? 'threat' : 'clean');
+    resultBox.className = 'ip-result show ' + (data.threatLevel === 'Clean' ? 'clean' : 'threat');
 
     const scoreColor = score >= 75 ? '#f87171'
                      : score >= 50 ? '#f59e0b'
@@ -61,9 +61,13 @@ async function checkLiveIP() {
                      : score >  0  ? '#fbbf24'
                      : '#34d399';
 
-    document.getElementById('ip-verdict').innerHTML = isThreat
-      ? `<span style="color:#f87171">⚠ THREAT DETECTED</span> &nbsp;<span style="font-size:12px;color:var(--muted);font-weight:400">— ${data.threatLevel} Risk</span>`
-      : `<span style="color:var(--accent)">✓ NO THREAT FOUND</span> &nbsp;<span style="font-size:12px;color:var(--muted);font-weight:400">— Clean IP</span>`;
+    var verdictColors = { Critical:'#f87171', High:'#f59e0b', Medium:'#60a5fa', Low:'#fbbf24', Clean:'#34d399' };
+    var vColor = verdictColors[data.threatLevel] || '#34d399';
+    var verdictHTML = data.threatLevel === 'Clean'
+      ? '<span style="color:#34d399">✓ CLEAN IP — No Threat Found</span>'
+      : '<span style="color:' + vColor + '">⚠ ' + data.threatLevel.toUpperCase() + ' RISK — Threat Detected</span>';
+    verdictHTML += ' &nbsp;<span style="font-size:12px;color:var(--muted);font-weight:400">(' + data.totalReports + ' global reports)</span>';
+    document.getElementById('ip-verdict').innerHTML = verdictHTML;
 
     document.getElementById('ip-score').style.color = scoreColor;
     document.getElementById('ip-score').textContent = score + '%';
@@ -185,7 +189,7 @@ async function checkLiveIP() {
     const isThreat = data.isThreat;
     const score    = data.abuseScore;
 
-    resultBox.className = 'ip-result show ' + (isThreat ? 'threat' : 'clean');
+    resultBox.className = 'ip-result show ' + (data.threatLevel === 'Clean' ? 'clean' : 'threat');
 
     const scoreColor = score >= 75 ? '#f87171'
                      : score >= 50 ? '#f59e0b'
@@ -193,9 +197,13 @@ async function checkLiveIP() {
                      : score >  0  ? '#fbbf24'
                      : '#34d399';
 
-    document.getElementById('ip-verdict').innerHTML = isThreat
-      ? `<span style="color:#f87171">⚠ THREAT DETECTED</span> &nbsp;<span style="font-size:12px;color:var(--muted);font-weight:400">— ${data.threatLevel} Risk</span>`
-      : `<span style="color:var(--accent)">✓ NO THREAT FOUND</span> &nbsp;<span style="font-size:12px;color:var(--muted);font-weight:400">— Clean IP</span>`;
+    var verdictColors = { Critical:'#f87171', High:'#f59e0b', Medium:'#60a5fa', Low:'#fbbf24', Clean:'#34d399' };
+    var vColor = verdictColors[data.threatLevel] || '#34d399';
+    var verdictHTML = data.threatLevel === 'Clean'
+      ? '<span style="color:#34d399">✓ CLEAN IP — No Threat Found</span>'
+      : '<span style="color:' + vColor + '">⚠ ' + data.threatLevel.toUpperCase() + ' RISK — Threat Detected</span>';
+    verdictHTML += ' &nbsp;<span style="font-size:12px;color:var(--muted);font-weight:400">(' + data.totalReports + ' global reports)</span>';
+    document.getElementById('ip-verdict').innerHTML = verdictHTML;
 
     document.getElementById('ip-score').style.color = scoreColor;
     document.getElementById('ip-score').textContent = score + '%';
@@ -1088,7 +1096,7 @@ function downloadReport() {
       ['Checked IP',    lastIPResult.ip],
       ['Abuse Score',   lastIPResult.abuseScore + '%'],
       ['Threat Level',  lastIPResult.threatLevel],
-      ['Status',        lastIPResult.isThreat ? 'THREAT DETECTED' : 'CLEAN - NO THREAT'],
+      ['Status',        lastIPResult.threatLevel === 'Clean' ? '✓ CLEAN — No Threat' : '⚠ ' + lastIPResult.threatLevel.toUpperCase() + ' RISK DETECTED'],
       ['Country',       lastIPResult.countryName || lastIPResult.country],
       ['ISP',           lastIPResult.isp],
       ['Usage Type',    lastIPResult.usageType],
@@ -1099,7 +1107,7 @@ function downloadReport() {
     ipFields.forEach(function(pair) {
       doc.setTextColor(100, 116, 139); doc.setFontSize(9);
       doc.text(pair[0] + ':', 18, y + 4);
-      var isAlert = (pair[0] === 'Status' && lastIPResult.isThreat);
+      var isAlert = (pair[0] === 'Status' && lastIPResult.threatLevel !== 'Clean');
       doc.setTextColor(isAlert ? 239 : 226, isAlert ? 68 : 232, isAlert ? 68 : 240);
       doc.setFont('helvetica', 'bold');
       doc.text(String(pair[1]), 90, y + 4);
@@ -1158,6 +1166,9 @@ function downloadReport() {
       doc.text('Model Performance Metrics', 15, 32);
       var barImg = barCanvas.toDataURL('image/png');
       doc.addImage(barImg, 'PNG', 15, 38, 175, 80);
+      // Bar chart note
+      doc.setTextColor(100, 116, 139); doc.setFontSize(7); doc.setFont('helvetica', 'italic');
+      doc.text('Note: Y-axis starts at 75% to highlight metric differences clearly', 15, 122);
       // Pie chart
       doc.setTextColor(226, 232, 240); doc.setFontSize(11); doc.setFont('helvetica', 'bold');
       doc.text('Threat Distribution', 15, 132);
@@ -1239,7 +1250,7 @@ async function checkLiveIP() {
     const isThreat = data.isThreat;
     const score    = data.abuseScore;
 
-    resultBox.className = 'ip-result show ' + (isThreat ? 'threat' : 'clean');
+    resultBox.className = 'ip-result show ' + (data.threatLevel === 'Clean' ? 'clean' : 'threat');
 
     const scoreColor = score >= 75 ? '#f87171'
                      : score >= 50 ? '#f59e0b'
@@ -1247,9 +1258,13 @@ async function checkLiveIP() {
                      : score >  0  ? '#fbbf24'
                      : '#34d399';
 
-    document.getElementById('ip-verdict').innerHTML = isThreat
-      ? `<span style="color:#f87171">⚠ THREAT DETECTED</span> &nbsp;<span style="font-size:12px;color:var(--muted);font-weight:400">— ${data.threatLevel} Risk</span>`
-      : `<span style="color:var(--accent)">✓ NO THREAT FOUND</span> &nbsp;<span style="font-size:12px;color:var(--muted);font-weight:400">— Clean IP</span>`;
+    var verdictColors = { Critical:'#f87171', High:'#f59e0b', Medium:'#60a5fa', Low:'#fbbf24', Clean:'#34d399' };
+    var vColor = verdictColors[data.threatLevel] || '#34d399';
+    var verdictHTML = data.threatLevel === 'Clean'
+      ? '<span style="color:#34d399">✓ CLEAN IP — No Threat Found</span>'
+      : '<span style="color:' + vColor + '">⚠ ' + data.threatLevel.toUpperCase() + ' RISK — Threat Detected</span>';
+    verdictHTML += ' &nbsp;<span style="font-size:12px;color:var(--muted);font-weight:400">(' + data.totalReports + ' global reports)</span>';
+    document.getElementById('ip-verdict').innerHTML = verdictHTML;
 
     document.getElementById('ip-score').style.color = scoreColor;
     document.getElementById('ip-score').textContent = score + '%';
