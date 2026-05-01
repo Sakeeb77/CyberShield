@@ -22,6 +22,7 @@ async function checkLiveIP() {
   resultBox.className = 'ip-result';
   resultBox.style.display = 'none';
   errorBox.style.display  = 'none';
+  document.getElementById('ip-threat-info').style.display = 'none';
 
   if (!ip) {
     errorBox.className = 'ip-error';
@@ -66,6 +67,39 @@ async function checkLiveIP() {
 
     document.getElementById('ip-score').style.color = scoreColor;
     document.getElementById('ip-score').textContent = score + '%';
+
+    // Threat descriptions and recommendations
+    var threatDescs = {
+      Critical: 'This IP has been widely reported for malicious activity including DDoS attacks, brute force attempts, port scanning, and other serious cyber threats. It poses a critical risk to any network it contacts.',
+      High:     'This IP has been reported multiple times for suspicious activity such as unauthorized access attempts, malware distribution, or reconnaissance scanning. Exercise extreme caution.',
+      Medium:   'This IP has some reports of suspicious behaviour. It may be involved in low-level scanning, spam, or probing activity. Monitor any connections from this address.',
+      Low:      'This IP has a small number of reports. It may have been involved in minor suspicious activity. Treat with caution but it is not an immediate critical threat.',
+      Clean:    'This IP has no active threat reports in the AbuseIPDB database. It appears to be a clean, legitimate IP address with no known malicious activity.'
+    };
+    var threatRecs = {
+      Critical: ['Block this IP immediately at your firewall', 'Investigate any recent connections from this address', 'Report the IP to your security team', 'Enable DDoS protection if under active attack', 'Review server logs for any intrusion attempts'],
+      High:     ['Add this IP to your blocklist', 'Scan your systems for signs of compromise', 'Enable intrusion detection alerts', 'Review access logs for unauthorized activity', 'Apply rate limiting on this IP'],
+      Medium:   ['Monitor traffic from this IP closely', 'Consider temporary blocking if activity continues', 'Enable enhanced logging for this address', 'Check for repeated connection attempts'],
+      Low:      ['Keep this IP under observation', 'No immediate action required', 'Continue normal monitoring procedures'],
+      Clean:    ['No action required — this is a clean IP', 'Continue standard network monitoring', 'Maintain regular security audits']
+    };
+
+    var lvl = data.threatLevel || 'Clean';
+    var desc = threatDescs[lvl] || threatDescs['Clean'];
+    var recs = threatRecs[lvl]  || threatRecs['Clean'];
+
+    document.getElementById('ip-threat-desc').textContent = desc;
+
+    var recsList = document.getElementById('ip-recs-list');
+    recsList.innerHTML = '';
+    recs.forEach(function(rec) {
+      var div = document.createElement('div');
+      div.style.cssText = 'display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);';
+      div.innerHTML = '<span style="color:var(--accent);font-size:14px;flex-shrink:0;">•</span><span>' + rec + '</span>';
+      recsList.appendChild(div);
+    });
+
+    document.getElementById('ip-threat-info').style.display = 'block';
     document.getElementById('ip-address').textContent = data.ip;
     document.getElementById('ip-country').textContent = (data.countryName || data.country || 'Unknown');
     document.getElementById('ip-isp').textContent     = data.isp     || 'Unknown';
@@ -83,6 +117,7 @@ async function checkLiveIP() {
     errorBox.textContent = '⚠ ' + (err.message || 'Failed to check IP. Please try again.');
     errorBox.style.display = 'block';
     lastIPResult = null;
+    document.getElementById('ip-threat-info').style.display = 'none';
   } finally {
     btn.disabled = false;
     btn.textContent = '▶ Check IP';
@@ -119,6 +154,7 @@ async function checkLiveIP() {
   resultBox.className = 'ip-result';
   resultBox.style.display = 'none';
   errorBox.style.display  = 'none';
+  document.getElementById('ip-threat-info').style.display = 'none';
 
   if (!ip) {
     errorBox.className = 'ip-error';
@@ -163,6 +199,39 @@ async function checkLiveIP() {
 
     document.getElementById('ip-score').style.color = scoreColor;
     document.getElementById('ip-score').textContent = score + '%';
+
+    // Threat descriptions and recommendations
+    var threatDescs = {
+      Critical: 'This IP has been widely reported for malicious activity including DDoS attacks, brute force attempts, port scanning, and other serious cyber threats. It poses a critical risk to any network it contacts.',
+      High:     'This IP has been reported multiple times for suspicious activity such as unauthorized access attempts, malware distribution, or reconnaissance scanning. Exercise extreme caution.',
+      Medium:   'This IP has some reports of suspicious behaviour. It may be involved in low-level scanning, spam, or probing activity. Monitor any connections from this address.',
+      Low:      'This IP has a small number of reports. It may have been involved in minor suspicious activity. Treat with caution but it is not an immediate critical threat.',
+      Clean:    'This IP has no active threat reports in the AbuseIPDB database. It appears to be a clean, legitimate IP address with no known malicious activity.'
+    };
+    var threatRecs = {
+      Critical: ['Block this IP immediately at your firewall', 'Investigate any recent connections from this address', 'Report the IP to your security team', 'Enable DDoS protection if under active attack', 'Review server logs for any intrusion attempts'],
+      High:     ['Add this IP to your blocklist', 'Scan your systems for signs of compromise', 'Enable intrusion detection alerts', 'Review access logs for unauthorized activity', 'Apply rate limiting on this IP'],
+      Medium:   ['Monitor traffic from this IP closely', 'Consider temporary blocking if activity continues', 'Enable enhanced logging for this address', 'Check for repeated connection attempts'],
+      Low:      ['Keep this IP under observation', 'No immediate action required', 'Continue normal monitoring procedures'],
+      Clean:    ['No action required — this is a clean IP', 'Continue standard network monitoring', 'Maintain regular security audits']
+    };
+
+    var lvl = data.threatLevel || 'Clean';
+    var desc = threatDescs[lvl] || threatDescs['Clean'];
+    var recs = threatRecs[lvl]  || threatRecs['Clean'];
+
+    document.getElementById('ip-threat-desc').textContent = desc;
+
+    var recsList = document.getElementById('ip-recs-list');
+    recsList.innerHTML = '';
+    recs.forEach(function(rec) {
+      var div = document.createElement('div');
+      div.style.cssText = 'display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);';
+      div.innerHTML = '<span style="color:var(--accent);font-size:14px;flex-shrink:0;">•</span><span>' + rec + '</span>';
+      recsList.appendChild(div);
+    });
+
+    document.getElementById('ip-threat-info').style.display = 'block';
     document.getElementById('ip-address').textContent = data.ip;
     document.getElementById('ip-country').textContent = (data.countryName || data.country || 'Unknown');
     document.getElementById('ip-isp').textContent     = data.isp     || 'Unknown';
@@ -180,6 +249,7 @@ async function checkLiveIP() {
     errorBox.textContent = '⚠ ' + (err.message || 'Failed to check IP. Please try again.');
     errorBox.style.display = 'block';
     lastIPResult = null;
+    document.getElementById('ip-threat-info').style.display = 'none';
   } finally {
     btn.disabled = false;
     btn.textContent = '▶ Check IP';
@@ -699,6 +769,21 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="ip-detail-item"><div class="ip-d-label">Total Reports</div><div class="ip-d-val" id="ip-reports">—</div></div>
             <div class="ip-detail-item"><div class="ip-d-label">Last Reported</div><div class="ip-d-val" id="ip-last">—</div></div>
           </div>
+
+          <!-- Threat description + recommendations -->
+          <div id="ip-threat-info" style="display:none; margin-top:1rem;">
+            <div id="ip-threat-desc" style="font-size:13px; color:var(--muted); padding:10px 14px;
+              background:var(--surface2); border-radius:8px; border:1px solid var(--border);
+              margin-bottom:10px; line-height:1.6;"></div>
+            <div id="ip-recs-box" style="background:var(--surface2); border-radius:10px;
+              border:1px solid var(--border); padding:12px 14px;">
+              <p style="font-size:11px;text-transform:uppercase;letter-spacing:1px;
+                color:var(--accent);font-weight:700;margin-bottom:8px;">
+                &#128737; Defensive Recommendations
+              </p>
+              <div id="ip-recs-list"></div>
+            </div>
+          </div>
         </div>
 
         <div id="ip-error" style="display:none;"></div>
@@ -1021,6 +1106,39 @@ function downloadReport() {
       doc.setFont('helvetica', 'normal');
       y += 9;
     });
+    // Threat description in PDF
+    y += 6;
+    var pdfDescs = {
+      Critical: 'This IP is critically dangerous. Widely reported for DDoS, brute force, and intrusion attempts.',
+      High:     'This IP is high risk. Multiple reports of unauthorized access attempts and malware activity.',
+      Medium:   'This IP has moderate risk. Some reports of scanning or suspicious probing activity.',
+      Low:      'This IP has low-level reports. Minor suspicious activity detected.',
+      Clean:    'This IP appears clean with no active threat reports in AbuseIPDB.'
+    };
+    var pdfRecs = {
+      Critical: ['Block immediately at firewall', 'Investigate recent connections', 'Enable DDoS protection', 'Review server logs for intrusions'],
+      High:     ['Add to blocklist', 'Scan systems for compromise', 'Enable intrusion detection', 'Review access logs'],
+      Medium:   ['Monitor closely', 'Consider temporary block', 'Enable enhanced logging'],
+      Low:      ['Keep under observation', 'No immediate action required'],
+      Clean:    ['No action required', 'Continue standard monitoring']
+    };
+    var ipLvl = lastIPResult.threatLevel || 'Clean';
+    doc.setFillColor(20, 30, 48); doc.rect(13, y - 2, 180, 8, 'F');
+    doc.setTextColor(0, 212, 170); doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+    doc.text('Threat Assessment:', 18, y + 4);
+    doc.setTextColor(226, 232, 240); doc.setFont('helvetica', 'normal');
+    var descLines = doc.splitTextToSize(pdfDescs[ipLvl] || pdfDescs['Clean'], 160);
+    y += 10;
+    doc.text(descLines, 18, y); y += descLines.length * 6 + 4;
+    doc.setTextColor(0, 212, 170); doc.setFontSize(9); doc.setFont('helvetica', 'bold');
+    doc.text('Recommendations:', 18, y); y += 7;
+    var ipRecList = pdfRecs[ipLvl] || pdfRecs['Clean'];
+    doc.setFont('helvetica', 'normal'); doc.setTextColor(226, 232, 240);
+    ipRecList.forEach(function(rec) {
+      doc.setTextColor(0, 212, 170); doc.text('•', 18, y);
+      doc.setTextColor(226, 232, 240); doc.text(rec, 24, y);
+      y += 7;
+    });
 
   }
 
@@ -1090,6 +1208,7 @@ async function checkLiveIP() {
   resultBox.className = 'ip-result';
   resultBox.style.display = 'none';
   errorBox.style.display  = 'none';
+  document.getElementById('ip-threat-info').style.display = 'none';
 
   if (!ip) {
     errorBox.className = 'ip-error';
@@ -1134,6 +1253,39 @@ async function checkLiveIP() {
 
     document.getElementById('ip-score').style.color = scoreColor;
     document.getElementById('ip-score').textContent = score + '%';
+
+    // Threat descriptions and recommendations
+    var threatDescs = {
+      Critical: 'This IP has been widely reported for malicious activity including DDoS attacks, brute force attempts, port scanning, and other serious cyber threats. It poses a critical risk to any network it contacts.',
+      High:     'This IP has been reported multiple times for suspicious activity such as unauthorized access attempts, malware distribution, or reconnaissance scanning. Exercise extreme caution.',
+      Medium:   'This IP has some reports of suspicious behaviour. It may be involved in low-level scanning, spam, or probing activity. Monitor any connections from this address.',
+      Low:      'This IP has a small number of reports. It may have been involved in minor suspicious activity. Treat with caution but it is not an immediate critical threat.',
+      Clean:    'This IP has no active threat reports in the AbuseIPDB database. It appears to be a clean, legitimate IP address with no known malicious activity.'
+    };
+    var threatRecs = {
+      Critical: ['Block this IP immediately at your firewall', 'Investigate any recent connections from this address', 'Report the IP to your security team', 'Enable DDoS protection if under active attack', 'Review server logs for any intrusion attempts'],
+      High:     ['Add this IP to your blocklist', 'Scan your systems for signs of compromise', 'Enable intrusion detection alerts', 'Review access logs for unauthorized activity', 'Apply rate limiting on this IP'],
+      Medium:   ['Monitor traffic from this IP closely', 'Consider temporary blocking if activity continues', 'Enable enhanced logging for this address', 'Check for repeated connection attempts'],
+      Low:      ['Keep this IP under observation', 'No immediate action required', 'Continue normal monitoring procedures'],
+      Clean:    ['No action required — this is a clean IP', 'Continue standard network monitoring', 'Maintain regular security audits']
+    };
+
+    var lvl = data.threatLevel || 'Clean';
+    var desc = threatDescs[lvl] || threatDescs['Clean'];
+    var recs = threatRecs[lvl]  || threatRecs['Clean'];
+
+    document.getElementById('ip-threat-desc').textContent = desc;
+
+    var recsList = document.getElementById('ip-recs-list');
+    recsList.innerHTML = '';
+    recs.forEach(function(rec) {
+      var div = document.createElement('div');
+      div.style.cssText = 'display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);';
+      div.innerHTML = '<span style="color:var(--accent);font-size:14px;flex-shrink:0;">•</span><span>' + rec + '</span>';
+      recsList.appendChild(div);
+    });
+
+    document.getElementById('ip-threat-info').style.display = 'block';
     document.getElementById('ip-address').textContent = data.ip;
     document.getElementById('ip-country').textContent = (data.countryName || data.country || 'Unknown');
     document.getElementById('ip-isp').textContent     = data.isp     || 'Unknown';
@@ -1151,6 +1303,7 @@ async function checkLiveIP() {
     errorBox.textContent = '⚠ ' + (err.message || 'Failed to check IP. Please try again.');
     errorBox.style.display = 'block';
     lastIPResult = null;
+    document.getElementById('ip-threat-info').style.display = 'none';
   } finally {
     btn.disabled = false;
     btn.textContent = '▶ Check IP';
