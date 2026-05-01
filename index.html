@@ -40,8 +40,7 @@ async function checkLiveIP() {
     document.getElementById(id).textContent = '...';
   });
 
-  try {
-    const response = await fetch(`/.netlify/functions/check-ip?ip=${encodeURIComponent(ip)}`);
+  try {const response = await fetch('/.netlify/functions/check-ip?ip=' + encodeURIComponent(ip));
     const data = await response.json();
 
     if (!response.ok) {
